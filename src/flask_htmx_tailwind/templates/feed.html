@@ -1,25 +1,59 @@
+{% from 'icons.jinja2' import hamburger, close_x %}
+
 {% extends 'base.html' %}
 
-{% block content %}
-<div class="hidden lg:fixed lg:z-50 lg:flex lg:w-72 lg:flex-col">
+{% macro sidebar() %}
+
   <div class="flex grow flex-col overflow-y-auto bg-white px-6 py-4">
     <nav class="flex flex-1 flex-col">
       <ul class="flex flex-1 flex-col gap-y-3" role="list">
         {% for feed_url, feed_ in feeds.items() %}
           <li>
-            <a href="{{ url_for('render_feed', feed_url=feed_.href) }}" class="{{ 'bg-green-700 text-white' if feed.href == feed_['href'] else '' }} rounded-md p-2 text-sm leading-6 font-semibold">{{ feed_.title}}</a>
+            <a x-data href="{{ url_for('render_feed', feed_url=feed_.href) }}" class="{{ 'bg-green-700 text-white' if feed.href == feed_['href'] else '' }} flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold">
+              {{ feed_.title}}
+              <span>(<span @read.window="{{'$el.innerHTML -= $event.detail.read ? 0 : 1' if feed.href == feed_['href'] else '' }}">{{ feed_['entries'].values() | rejectattr('read') | list | length }}</span>)</span>
+            </a>
           </li>
         {% endfor %}
       </ul>
     </nav>
-  </div>
-</div>
-<div class="pl-72">
-  <main class="py-10">
-    <div class="px-4 sm:px-6 lg:px-8" hx-get="{{ url_for('render_feed_entries', feed_url=feed.href, page=0)}}" hx-target="this" hx-swap="afterbegin" hx-trigger="load">
-
+    <div class="flex flex-col justify-center items-center" x-data="{ show: false }">
+      <div x-show="show">{{ render_partial('partials/add_feed.html') }}</div>
+      <button x-on:click="show = !show" class="bg-slate-600 text-white font-semibold rounded-md px-4 py-2 pointer-cursor mt-2" x-text="show ? 'Hide' : 'Show'">Show</button>
     </div>
-  </main>
+  </div>
+{% endmacro %}
+
+{% block content %}
+<div x-data="{ open: false }">
+  <div class="relative z-50 lg:hidden" role="dialog" aria-modal="true" x-show="open" x-cloak>
+    <div class="fixed inset-0 bg-gray-900/80 ease-linear duration-500" x-show="open" x-transition.opacity></div>
+    <div class="fixed inset-0 flex">
+      <div class="relative mr-16 flex w-full max-w-xs mar-w-xs flex-1" x-show="open" x-transition:enter="transition-transform ease-in duration-300" x-transition:enter-start="-translate-x-full" x-transition:enter-end="translate-x-0" x-transition:leave="transition-transform ease-out duration-300" x-transition:leave-start="transition-x-0" x-transition:leave-end="-translate-x-full">
+        <div class="absolute left-full top-0 flex w-16 justify-center p-5 ease-in-out duration-500" x-show="open" x-transition.opacity>
+          <button type="button" class="-m-2.5 p-2.5 cursor-pointer" x-on:click="open = false">
+            {{ close_x("h-6 w-6 text-white") }}
+          </button>
+        </div>
+        {{ sidebar() }}
+      </div>
+    </div>
+  </div>
+  <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+    {{ sidebar() }}
+  </div>
+  <div class="lg:pl-72">
+    <div class="sticky lg:hidden top-0 z-40 flex h-16 shrink-0 items-center border-b border-gray-200 bg-white px-4 shadow-sm sm:px-6">
+      <button class="-m-2.5 p-2.5 text-gray-700 cursor-pointer" x-on:click="open=true">
+        <span class="sr-only">Open Sidebar</span>
+        {{ hamburger("h-6 w-6") }}
+      </button>
+    </div>
+    <main class="py-10">
+      <div class="px-4 sm:px-6 lg:px-8" hx-get="{{ url_for('render_feed_entries', feed_url=feed.href, page=0) }}" hx-target="this" hx-swap="afterbegin" hx-trigger="load">
+      </div>
+    </main>
+  </div>
 </div>
 
 {% endblock content %}

@@ -4,12 +4,19 @@
       <img class="aspect-video rounded-md shadow-md" src="{{ media_content[0] }}">
     </div>
   {% endif %}
-  <div class="ml-8 {{ 'col-start-2' if media_content else 'col-start-1 col-span-2' }}">
-    <h2 class="font-bold text-2xl">{{title}}</h2>
+  <div class="ml-8 {{ 'col-start-2' if media_content else 'col-start-1 col-span-2' }}" x-data="{ read: {{read | lower}} }">
+    <h2 class="font-bold text-2xl">
+      {% if not read %}
+      <svg x-show="!read" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" class="fill-emerald-500 h-3 w-3 inline-block mb-1">
+        <circle cx="8" cy="8" r="8"></circle>
+      </svg>
+      {% endif %}
+      {{title}}
+    </h2>
     <p>
       Published by <span class="font-medium">{{author}}</span> on <span class="font-medium">{{published}}</span>
     </p>
     <p class="leading-6 mb-2">{{summary}}</p>
-    <a href="{{ link }}" class="underline" target="_blank"></a>
+    <a x-on:click="$dispatch('read', { read: read }); read = true;" href="{{ url_for('read_entry', feed_url=feed_url, entry_url=link) }}" class="underline" target="_blank">Read Article</a>
   </div>
 </article>
