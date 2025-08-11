@@ -19,7 +19,7 @@
     </nav>
     <div class="flex flex-col justify-center items-center" x-data="{ show: false }">
       <div x-show="show">{{ render_partial('partials/add_feed.html') }}</div>
-      <button x-on:click="show = !show" class="bg-slate-600 text-white font-semibold rounded-md px-4 py-2 pointer-cursor mt-2" x-text="show ? 'Hide' : 'Show'">Show</button>
+      <button x-on:click="show = !show" class="bg-slate-600 text-white font-semibold rounded-md px-4 py-2 pointer-cursor mt-2" x-text="show ? 'Cancel' : 'Add Blog Feed'">Add Blog Feed</button>
     </div>
   </div>
 {% endmacro %}
